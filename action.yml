@@ -1,0 +1,13 @@
+name: 'Update Github Issue State'
+description: 'Modify the state of a github issue'
+inputs:
+  issue_number:
+    description: 'The issue number being modified'
+    required: true
+  state:
+    description: 'The issue_number sstate to be set'
+    required: true
+    default: 'open'
+runs:
+  using: 'node20'
+  main: 'index.js'
