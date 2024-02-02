@@ -10,7 +10,7 @@ async function run() {
     const context = github.context;
 
     console.log({
-      context,
+      github: github.context.payload.pull_request,
       githubToken,
       pullNumber,
       state,
