@@ -47,7 +47,8 @@
 
     for (const linkedIssue of linkedIssues) {
       const { data: issue } = await octokit.rest.issues.update({
-        ...context,
+        reop,
+        owner,
         issue_number: linkedIssue.number,
         state,
       });
