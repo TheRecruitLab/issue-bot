@@ -13,17 +13,16 @@ async function run() {
     }
 
     console.log({
-      contextpayload: context.payload,
-      repo: context.payload?.sender?.repository?.name,
-      owner: context.payload?.sender?.owner?.name,
+      repo: context.payload?.repository?.name,
+      owner: context.payload?.repository?.owner?.name,
       pull_number: context.payload.pull_request.number,
     });
 
-    // const { data: pullRequest } = await octokit.rest.pulls.get({
-    //   repo: context.payload?.sender?.repository?.name,
-    //   owner: context.payload?.sender?.owner?.name,
-    //   pull_number: context.payload.pull_request.number,
-    // });
+    const { data: pullRequest } = await octokit.rest.pulls.get({
+      repo: context.payload?.repository?.name,
+      owner: context.payload?.repository?.owner?.name,
+      pull_number: context.payload.pull_request.number,
+    });
 
     // console.log(pullRequest);
 
