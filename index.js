@@ -19,23 +19,6 @@ async function run() {
         throw new Error('Invalid Github event. Must be a pull_request event.');
     }
 
-    // console.log({
-    //   repo: context.payload?.repository?.name,
-    //   owner: context.payload?.repository?.owner?.login,
-    //   pull_number: context.payload.pull_request.number,
-    // });
-
-    // const { data: pullRequest } = await octokit.rest.pulls.get({
-    //   repo: context.payload?.repository?.name,
-    //   owner: context.payload?.repository?.owner?.login,
-    //   pull_number: context.payload.pull_request.number,
-    // });
-
-    // console.log({ 
-    //   pullRequest,
-    //   issues: pullRequest?._links?.issue,
-    // });
-
     const { repository } = await graphqlWithAuth(`
       {
         repository(owner: "${context.payload?.repository?.owner?.login}", name: "${context.payload?.repository?.name}") {
@@ -59,7 +42,7 @@ async function run() {
 
 console.log({
   PR: repository.pullRequest,
-  closing: repository.pullRequest.closingIssuesReferences.nodes,
+  closing: repository.pullRequest.closingIssuesReferences.nodes[0],
 });
 
     // if (! pullRequest) {
