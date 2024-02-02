@@ -4,9 +4,6 @@ inputs:
   github_token:
     description: 'The github token'
     required: true
-  pull_number:
-    description: 'The pull request number being modified'
-    required: true
   requires_merge:
     description: 'Requires the pull request to be merged in order to modify the issue state'
     required: true
