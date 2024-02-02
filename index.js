@@ -24,7 +24,10 @@ async function run() {
       pull_number: context.payload.pull_request.number,
     });
 
-    console.log({ pullRequest });
+    console.log({ 
+      pullRequest,
+      issues: pullRequest?._links?.issue,
+    });
 
     // if (! pullRequest) {
     //   throw new Error('Pull Request could not be found.');
