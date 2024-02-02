@@ -17,8 +17,9 @@ async function run() {
     });
 
     console.log({
-      github: github.context.payload.pull_request,
-      sender: context?.payload?.repository
+      github: context.payload,
+      repo: context?.payload?.repository?.name,
+      owner: context?.payload?.owner?.name
     });
 
     // const { data: pullRequest } = await octokit.rest.pulls.get({
