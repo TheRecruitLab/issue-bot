@@ -12,9 +12,15 @@ async function run() {
         throw new Error('Invalid Github event. Must be a pull_request event.');
     }
 
+    console.log({
+      repo: context.payload?.sender?.repository?.name,
+      owner: context.payload?.sender?.owner?.name,
+      pull_number: context.payload.pull_request.number,
+    });
+
     const { data: pullRequest } = await octokit.rest.pulls.get({
-      repo: context.payload.sender.repository.name,
-      owner: context.payload.sender.owner.name,
+      repo: context.payload?.sender?.repository?.name,
+      owner: context.payload?.sender?.owner?.name,
       pull_number: context.payload.pull_request.number,
     });
 
