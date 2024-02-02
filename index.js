@@ -1,5 +1,6 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
+const { graphql } = require("@octokit/graphql");
 
 async function run() {
     const githubToken = core.getInput('github_token');
@@ -7,6 +8,12 @@ async function run() {
 
     const octokit = github.getOctokit(githubToken)
     const context = github.context;
+
+    const graphqlWithAuth = graphql.defaults({
+      headers: {
+        authorization: `token ${githubToken}`,
+      },
+    });
 
     if (! context?.payload?.pull_request) {
         throw new Error('Invalid Github event. Must be a pull_request event.');
@@ -28,6 +35,24 @@ async function run() {
       pullRequest,
       issues: pullRequest?._links?.issue,
     });
+
+    const { repository } = await graphqlWithAuth(`
+  {
+    repository(owner: "octokit", name: "graphql.js") {
+      pullRequest(number: ${context.payload.pull_request.number}) { 
+        closingIssuesReferences(first: 10) { 
+          nodes { 
+            number 
+          } 
+        } 
+      }
+    }
+  }
+`);
+
+console.log({
+  repository
+});
 
     // if (! pullRequest) {
     //   throw new Error('Pull Request could not be found.');
