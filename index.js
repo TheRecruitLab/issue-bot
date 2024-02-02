@@ -18,7 +18,7 @@ async function run() {
 
     console.log({
       github: github.context.payload.pull_request,
-      sender: context?.payload?.sender,
+      sender: context?.payload?.repository
     });
 
     // const { data: pullRequest } = await octokit.rest.pulls.get({
