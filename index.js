@@ -14,15 +14,15 @@ async function run() {
 
     console.log({
       repo: context.payload?.repository?.name,
-      owner: context.payload?.repository?.owner?.name,
+      owner: context.payload?.repository?.owner,
       pull_number: context.payload.pull_request.number,
     });
 
-    const { data: pullRequest } = await octokit.rest.pulls.get({
-      repo: context.payload?.repository?.name,
-      owner: context.payload?.repository?.owner?.name,
-      pull_number: context.payload.pull_request.number,
-    });
+    // const { data: pullRequest } = await octokit.rest.pulls.get({
+    //   repo: context.payload?.repository?.name,
+    //   owner: context.payload?.repository?.owner?.name,
+    //   pull_number: context.payload.pull_request.number,
+    // });
 
     // console.log(pullRequest);
 
