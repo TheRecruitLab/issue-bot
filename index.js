@@ -47,6 +47,7 @@
 
     if (requiresMerge && ! repository?.pullRequest?.merged) {
       console.log('The Pull Request must be merged in order to update associated issues.');
+      
       return;
     }
 
