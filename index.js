@@ -51,7 +51,7 @@ async function run() {
     `);
 
 console.log({
-  repository: repository.pull_request.closingIssuesReferences,
+  repository: repository.pullRequest.closingIssuesReferences,
 });
 
     // if (! pullRequest) {
