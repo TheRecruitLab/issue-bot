@@ -38,7 +38,7 @@ async function run() {
 
     const { repository } = await graphqlWithAuth(`
       {
-        repository(owner: ${context.payload?.repository?.owner?.login}, name: ${context.payload?.repository?.name}) {
+        repository(owner: "${context.payload?.repository?.owner?.login}", name: "${context.payload?.repository?.name}") {
           pullRequest(number: ${context.payload.pull_request.number}) { 
             author {
               login
