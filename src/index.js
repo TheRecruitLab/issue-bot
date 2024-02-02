@@ -5,7 +5,7 @@
   async function run() {
     const githubToken = core.getInput('github_token');
     const state = core.getInput('state');
-    const requiresMerge = core.getInput('requires_merge');
+    const requiresMerge = Boolean(core.getInput('requires_merge')) === 'true';
 
     const octokit = github.getOctokit(githubToken)
     const context = github.context;
@@ -46,7 +46,7 @@
     `);
 
     if (requiresMerge && ! repository?.pullRequest?.merged) {
-      console.log('The Pull Request must be merged in order to update associated issues.', { requiresMerge });
+      console.log('The Pull Request must be merged in order to update associated issues.');
       
       return;
     }
