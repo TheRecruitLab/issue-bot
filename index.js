@@ -40,11 +40,13 @@ async function run() {
       {
         repository(owner: "octokit", name: "graphql.js") {
           pullRequest(number: ${context.payload.pull_request.number}) { 
-            author,
+            author {
+              login
+            }
             state,
             id,
             number,
-            closingIssuesReferences(first: 10) { 
+            closingIssuesReferences(first: 100) { 
               nodes { 
                 number 
               },
