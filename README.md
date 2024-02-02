@@ -1,10 +1,19 @@
 # Inputs
 
-| Input          | Default | Required | Description                                                   |
-| --------------------------------------------------------------------------------------------------- |
-| github_token   | -       | true     | The github token used to authenticate with the github API     |
-| requires_merge | true    | true     | Determines if the PR must be merged to modify the issue state |
-| state          | open    | true     | The issue state to be set                                     |
+* github_token
+   * default: -
+   * required: true
+   * description: The github token used to authenticate with the github API
+
+* requires_merge
+   * default: true
+   * required: true
+   * description: Determines if the PR must be merged to modify the issue state
+
+* state
+   * default: open
+   * required: true
+   * description: The issue state to be set
 
 
 # About
