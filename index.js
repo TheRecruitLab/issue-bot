@@ -17,8 +17,8 @@ async function run() {
     });
 
     const { data: pullRequest } = await octokit.rest.pulls.get({
-      repo: sender.repository.name,
-      owner: sender.owner.name,
+      repo: context.payload.sender.repository.name,
+      owner: context.payload.sender.owner.name,
       pull_number: pullNumber,
     });
 
