@@ -7,6 +7,10 @@ inputs:
   pull_number:
     description: 'The pull request number being modified'
     required: true
+  requires_merge:
+    description: 'Requires the pull request to be merged in order to modify the issue state'
+    required: true
+    default: true
   state:
     description: 'The issue state to be set'
     required: true

@@ -5,6 +5,7 @@
   async function run() {
     const githubToken = core.getInput('github_token');
     const state = core.getInput('state');
+    const requiresMerge = core.getInput('requires_merge');
 
     const octokit = github.getOctokit(githubToken)
     const context = github.context;
@@ -25,23 +26,29 @@
     const { repository } = await graphqlWithAuth(`
       {
         repository(owner: "${owner}", name: "${repo}") {
-          pullRequest(number: ${context.payload.pull_request.number}) { 
+          pullRequest(number: ${context.payload.pull_request.number}) {
             author {
               login
-            }
-            state,
-            id,
-            number,
+            },
             closingIssuesReferences(first: 100) { 
               nodes { 
                 number 
               },
               totalCount,
-            } 
+            },
+            id,
+            merged,
+            number,
+            state,
           }
         }
       }
     `);
+
+    if (requiresMerge && ! repository?.pullRequest?.merged) {
+      console.log('The Pull Request must be merged in order to update associated issues.');
+      return;
+    }
 
     const linkedIssues = repository?.pullRequest?.closingIssuesReferences?.nodes || [];
 
