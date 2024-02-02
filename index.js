@@ -58,7 +58,8 @@ async function run() {
     `);
 
 console.log({
-  repository: repository.pullRequest.closingIssuesReferences,
+  PR: repository.pullRequest,
+  closing: repository.pullRequest.closingIssuesReferences,
 });
 
     // if (! pullRequest) {
