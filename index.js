@@ -19,39 +19,39 @@ async function run() {
         throw new Error('Invalid Github event. Must be a pull_request event.');
     }
 
-    console.log({
-      repo: context.payload?.repository?.name,
-      owner: context.payload?.repository?.owner?.login,
-      pull_number: context.payload.pull_request.number,
-    });
+    // console.log({
+    //   repo: context.payload?.repository?.name,
+    //   owner: context.payload?.repository?.owner?.login,
+    //   pull_number: context.payload.pull_request.number,
+    // });
 
-    const { data: pullRequest } = await octokit.rest.pulls.get({
-      repo: context.payload?.repository?.name,
-      owner: context.payload?.repository?.owner?.login,
-      pull_number: context.payload.pull_request.number,
-    });
+    // const { data: pullRequest } = await octokit.rest.pulls.get({
+    //   repo: context.payload?.repository?.name,
+    //   owner: context.payload?.repository?.owner?.login,
+    //   pull_number: context.payload.pull_request.number,
+    // });
 
-    console.log({ 
-      pullRequest,
-      issues: pullRequest?._links?.issue,
-    });
+    // console.log({ 
+    //   pullRequest,
+    //   issues: pullRequest?._links?.issue,
+    // });
 
     const { repository } = await graphqlWithAuth(`
-  {
-    repository(owner: "octokit", name: "graphql.js") {
-      pullRequest(number: ${context.payload.pull_request.number}) { 
-        closingIssuesReferences(first: 10) { 
-          nodes { 
-            number 
-          } 
-        } 
+      {
+        repository(owner: "octokit", name: "graphql.js") {
+          pullRequest(number: ${context.payload.pull_request.number}) { 
+            closingIssuesReferences(first: 10) { 
+              nodes { 
+                number 
+              } 
+            } 
+          }
+        }
       }
-    }
-  }
-`);
+    `);
 
 console.log({
-  repository
+  repository: repository.pull_request.closingIssuesReferences,
 });
 
     // if (! pullRequest) {
