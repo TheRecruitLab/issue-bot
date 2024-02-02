@@ -13,36 +13,37 @@ async function run() {
     }
 
     console.log({
+      contextpayload: context.payload,
       repo: context.payload?.sender?.repository?.name,
       owner: context.payload?.sender?.owner?.name,
       pull_number: context.payload.pull_request.number,
     });
 
-    const { data: pullRequest } = await octokit.rest.pulls.get({
-      repo: context.payload?.sender?.repository?.name,
-      owner: context.payload?.sender?.owner?.name,
-      pull_number: context.payload.pull_request.number,
-    });
+    // const { data: pullRequest } = await octokit.rest.pulls.get({
+    //   repo: context.payload?.sender?.repository?.name,
+    //   owner: context.payload?.sender?.owner?.name,
+    //   pull_number: context.payload.pull_request.number,
+    // });
 
-    console.log(pullRequest);
+    // console.log(pullRequest);
 
-    if (! pullRequest) {
-      throw new Error('Pull Request could not be found.');
-    } else if (! pullRequest?.issue_number) {
-      console.log('Pull Request is linked to an existing issue.');
-    }
+    // if (! pullRequest) {
+    //   throw new Error('Pull Request could not be found.');
+    // } else if (! pullRequest?.issue_number) {
+    //   console.log('Pull Request is linked to an existing issue.');
+    // }
 
-    const { data: issue } = await octokit.rest.issues.update({
-      ...context,
-      issue_number: pullRequest.issue_number,
-      state,
-    });
+    // const { data: issue } = await octokit.rest.issues.update({
+    //   ...context,
+    //   issue_number: pullRequest.issue_number,
+    //   state,
+    // });
 
-    if (! issue) {
-      throw new Error('An issue attached to the Pull Request could not be found.');
-    }
+    // if (! issue) {
+    //   throw new Error('An issue attached to the Pull Request could not be found.');
+    // }
 
-    console.log(`#${issue?.issue_number} was changed to ${issue.state}`);
+    // console.log(`#${issue?.issue_number} was changed to ${issue.state}`);
 }
 
 run();
