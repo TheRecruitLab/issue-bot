@@ -59,7 +59,7 @@ async function run() {
 
 console.log({
   PR: repository.pullRequest,
-  closing: repository.pullRequest.closingIssuesReferences,
+  closing: repository.pullRequest.closingIssuesReferences.nodes,
 });
 
     // if (! pullRequest) {
