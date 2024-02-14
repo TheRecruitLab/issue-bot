@@ -17,7 +17,7 @@
 
 
 # About
-The purpose of this action is to be able to modify an issue's stat via a pull_request event from a github workflow
+The purpose of this action is to be able to modify an issue's status via a pull_request event from a github workflow
 
 # Project Setup
 
