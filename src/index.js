@@ -124,6 +124,7 @@ async function run() {
           }
         }
       }
+    }
   }
 `);
 
