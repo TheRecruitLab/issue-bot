@@ -123,6 +123,31 @@ async function run() {
             id
           }
         }
+      },
+      issues (first: 200) {
+        id,
+        number,
+        projectCards(first: 50) {
+          nodes {
+            id,
+            project {
+              id
+            }
+          }
+        },
+        projectItems(first: 50) {
+          nodes {
+            id,
+            project {
+              id
+            }
+          }
+        },
+        projectsV2(first: 100) {
+          nodes {
+            id
+          }
+        }
       }
     }
   }
