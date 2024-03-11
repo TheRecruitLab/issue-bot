@@ -34,17 +34,6 @@ async function run() {
             nodes {
               id,
               number,
-              timelineItems(first: 100) {
-                nodes {
-                  ... on AddedToProjectEvent {
-                    id,
-                    project {
-                      id,
-                      name
-                    }
-                  }
-                }
-              }
               projectsV2(first: 100) {
                 nodes {
                   id
