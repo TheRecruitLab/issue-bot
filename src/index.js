@@ -98,31 +98,32 @@ async function run() {
 
   const { node: testing } = await graphqlWithAuth(`
   {
-    node(id: "${linkedIssue.id}") {
-      id,
-      number,
-      projectCards(first: 50) {
-        nodes {
-          id,
-          project {
+    repository(owner: "${owner}", name: "${repo}") {
+      issue (id: "${linkedIssue.id}") {
+        id,
+        number,
+        projectCards(first: 50) {
+          nodes {
+            id,
+            project {
+              id
+            }
+          }
+        },
+        projectItems(first: 50) {
+          nodes {
+            id,
+            project {
+              id
+            }
+          }
+        },
+        projectsV2(first: 100) {
+          nodes {
             id
           }
-        }
-      },
-      projectItems(first: 50) {
-        nodes {
-          id,
-          project {
-            id
-          }
-        }
-      },
-      projectsV2(first: 100) {
-        nodes {
-          id
         }
       }
-    },
   }
 `);
 
