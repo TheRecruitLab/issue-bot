@@ -37,8 +37,7 @@ async function run() {
                 nodes {
                   id,
                   project {
-                    id,
-                    title
+                    id
                   }
                 }
               },
@@ -46,15 +45,13 @@ async function run() {
                 nodes {
                   id,
                   project {
-                    id,
-                    title
+                    id
                   }
                 }
               },
               projectsV2(first: 100) {
                 nodes {
-                  id,
-                  title
+                  id
                 }
               }
             },
