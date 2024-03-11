@@ -35,7 +35,7 @@ async function run() {
               id,
               number,
               projectsV2(first: 100) {
-                node {
+                nodes {
                   id
                 }
               },
