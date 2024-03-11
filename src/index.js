@@ -34,6 +34,11 @@ async function run() {
             nodes {
               id,
               number,
+              projectsV2(first: 100) {
+                node {
+                  id
+                }
+              },
               projectItems(first: 100) {
                 edges {
                   cursor,
