@@ -38,7 +38,9 @@ async function run() {
                 nodes {
                   ... on AddedToProjectEvent {
                     id,
-                    project
+                    project {
+                      id
+                    }
                   }
                 }
               }
