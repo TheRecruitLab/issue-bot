@@ -34,7 +34,7 @@ async function run() {
             nodes {
               id,
               number,
-              timelineItems(first: 100, itemTypes: ["AddedToProjectEvent"]) {
+              timelineItems(first: 100) {
                 nodes {
                   ... on AddedToProjectEvent {
                     id,
