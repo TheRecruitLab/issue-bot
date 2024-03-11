@@ -121,9 +121,9 @@ async function run() {
                   }
                 }
                 ... on ProjectV2ItemFieldRepositoryValue {
-		  repository {
+		              repository {
                      name                  
-		 }
+		              }
                   field {
                     ... on ProjectV2FieldCommon {
                       name
@@ -136,6 +136,7 @@ async function run() {
         }
       }
     }
+  }
 `);
 
 console.log('testing', { ...testing });
