@@ -73,7 +73,7 @@ async function run() {
       }
     }
 
-    const { data: issueTesting } = await octokit.rest.issues.get({
+    const { data: issueTesting } = await octokit.rest.projects.listForRepo({
       repo,
       owner,
       issue_number: linkedIssue.number,
