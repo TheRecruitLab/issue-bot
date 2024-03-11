@@ -38,8 +38,7 @@ async function run() {
                   id,
                   fields(first: 100) {
                     nodes {
-                      id,
-                      name
+                      id
                     }
                   }
                 }
