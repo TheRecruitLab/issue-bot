@@ -34,7 +34,9 @@ async function run() {
             nodes { 
               number,
               projectsV2 {
-                id,
+                nodes {
+                  id
+                }
               }
             },
             totalCount,
