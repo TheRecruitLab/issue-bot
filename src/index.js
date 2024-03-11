@@ -99,6 +99,7 @@ async function run() {
   const { node: testing } = await graphqlWithAuth(`
   {
     repository(owner: "${owner}", name: "${repo}") {
+      name,
       issue (number: ${linkedIssue.number}) {
         id,
         number,
