@@ -87,23 +87,55 @@ async function run() {
       }
     }
 
-  const { organization: testing } = await graphqlWithAuth(`
+  const { node: testing } = await graphqlWithAuth(`
   {
-    organization(login: "${owner}") {
-      id,
-      projectsV2(first:100) {
-        nodes {
-          id
+    node(id: "PVT_kwDOCI-95M4AUzl4") {
+      ... on ProjectV2 {
+        items(first: 100) {
+          nodes {
+            id
+            fieldValues(first: 10) {
+              nodes {
+                ... on ProjectV2ItemFieldTextValue {
+                  text
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+                ... on ProjectV2ItemFieldDateValue {
+                  date
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+                ... on ProjectV2ItemFieldRepositoryValue {
+		  repository {
+                     name                  
+		 }
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-      },
-      repositories(first:100) {
-        nodes {
-          id
-        }
-      },
-      login
+      }
     }
-  }
 `);
 
 console.log('testing', { ...testing });
