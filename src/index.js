@@ -98,57 +98,10 @@ async function run() {
       }
     }
 
-  const { node: testing } = await graphqlWithAuth(`
-  {
-    node(id: "PVT_kwDOCI-95M4AUzl4") {
-      ... on ProjectV2 {
-        items(first: 100) {
-          nodes {
-            id
-            fieldValues(first: 10) {
-              nodes {
-                ... on ProjectV2ItemFieldTextValue {
-                  text
-                  field {
-                    ... on ProjectV2FieldCommon {
-                      name
-                    }
-                  }
-                }
-                ... on ProjectV2ItemFieldDateValue {
-                  date
-                  field {
-                    ... on ProjectV2FieldCommon {
-                      name
-                    }
-                  }
-                }
-                ... on ProjectV2ItemFieldSingleSelectValue {
-                  name
-                  field {
-                    ... on ProjectV2FieldCommon {
-                      name
-                    }
-                  }
-                }
-                ... on ProjectV2ItemFieldRepositoryValue {
-		              repository {
-                     name                  
-		              }
-                  field {
-                    ... on ProjectV2FieldCommon {
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`);
+  const { data: testing } = await octokit.rest.projectsV2.get({
+    project_id: 'PVTI_lADOCI-95M4AUzl4zgNXQvM',
+  });
+
 
 console.log('testing', { ...testing });
 
