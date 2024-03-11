@@ -88,11 +88,13 @@ async function run() {
     }
 
 
+console.log('testing', { ...testing });
+
     await graphqlWithAuth(`
     mutation {
       updateProjectV2ItemFieldValue(
         input: {
-          projectId: "PROJECT_ID"
+          projectId: "PVTI_lADOCI-95M4AUzl4zgNXQvM'"
           itemId: "ITEM_ID"
           fieldId: "FIELD_ID"
           value: { 
