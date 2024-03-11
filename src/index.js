@@ -88,8 +88,6 @@ async function run() {
     }
 
 
-console.log('testing', { ...testing });
-
     await graphqlWithAuth(`
     mutation {
       updateProjectV2ItemFieldValue(
