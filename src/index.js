@@ -79,6 +79,10 @@ async function run() {
       name,
       project(number: 2) {
         id,
+        name
+      },
+      projectV2(number: 2) {
+        id,
         title
       },
       issue (number: ${linkedIssue.number}) {
