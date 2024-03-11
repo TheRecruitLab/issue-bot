@@ -124,7 +124,7 @@ async function run() {
           }
         }
       },
-      issues (first: 200) {
+      issues (before: 200, after: 100) {
         nodes {
           id,
           number,
