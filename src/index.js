@@ -77,6 +77,16 @@ async function run() {
   {
     organization(login: "${owner}") {
       id,
+      projectsV2(first:100) {
+        nodes {
+          id
+        }
+      },
+      repositories(first:100) {
+        nodes {
+          id
+        }
+      },
       login
     }
   }
