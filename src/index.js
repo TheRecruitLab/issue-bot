@@ -69,8 +69,8 @@ async function run() {
     if (! issue) {
       throw new Error('An issue attached to the Pull Request could not be found.');
     }
-
-    for (const project of (issue?.projectsV2?.nodes || [])) {
+    console.log(linkedIssue);
+    for (const project of (linkedIssue?.projectsV2?.nodes || [])) {
       console.log('PROJECT ID', project?.id);
       for (const field of (project?.fields?.nodes || [])) {
         console.log('FIELD', { ...field });
