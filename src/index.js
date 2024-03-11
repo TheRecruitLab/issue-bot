@@ -34,29 +34,7 @@ async function run() {
             nodes {
               id,
               number,
-              projectCards(first: 50) {
-                nodes {
-                  id,
-                  project {
-                    id
-                  }
-                }
-              },
-              projectItems(first: 50) {
-                nodes {
-                  id,
-                  project {
-                    id
-                  }
-                }
-              },
-              projectsV2(first: 100) {
-                nodes {
-                  id
-                }
-              }
-            },
-            totalCount,
+            }
           },
           id,
           merged,
@@ -95,7 +73,13 @@ async function run() {
       }
     }
 
+    const { data: issueTesting } = await octokit.rest.issues.get({
+      repo,
+      owner,
+      issue_number: linkedIssue.number,
+    });
 
+    console.log(issueTesting);
   const { repository: testing } = await graphqlWithAuth(`
   {
     repository(owner: "${owner}", name: "${repo}") {
