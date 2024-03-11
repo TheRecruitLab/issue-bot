@@ -36,8 +36,11 @@ async function run() {
               number,
               projectItems(first: 100) {
                 edges {
-                  id,
-                  isArchived
+                  cursor,
+                  node {
+                    id,
+                    isArchived
+                  }
                 }
               }
             }
