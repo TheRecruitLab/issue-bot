@@ -112,14 +112,18 @@ async function run() {
           },
           totalCount
         },
-        projectItems(first: 50) {
-          nodes {
-            id,
-            project {
-              id
+        projectItems(first: 10) {
+          ... on ProjectV2ItemConnection {
+            nodes {
+              ... on ProjectV2Item {
+                project {
+                  ... on ProjectV2 {
+                    id, title
+                  }
+                }
+              }
             }
-          },
-          totalCount
+          }
         },
         projectsV2(first: 100) {
           nodes {
@@ -128,33 +132,6 @@ async function run() {
           totalCount
         }
       },
-      issues (last: 100) {
-        nodes {
-          id,
-          number,
-          projectCards(first: 50) {
-            nodes {
-              id,
-              project {
-                id
-              }
-            }
-          },
-          projectItems(first: 50) {
-            nodes {
-              id,
-              project {
-                id
-              }
-            }
-          },
-          projectsV2(first: 100) {
-            nodes {
-              id
-            }
-          }
-        }
-      }
     }
   }
 `);
