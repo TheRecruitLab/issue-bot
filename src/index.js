@@ -36,18 +36,25 @@ async function run() {
               projectCards(first: 50) {
                 nodes {
                   id,
-                  name
+                  project {
+                    id,
+                    title
+                  }
                 }
               },
               projectItems(first: 50) {
                 nodes {
                   id,
-                  name
+                  project {
+                    id,
+                    title
+                  }
                 }
               },
               projectsV2(first: 100) {
                 nodes {
-                  id
+                  id,
+                  title
                 }
               }
             },
