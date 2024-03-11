@@ -35,7 +35,7 @@ async function run() {
               id,
               number,
               projectItems(first: 100) {
-                nodes: {
+                nodes {
                   id,
                   isArchived
                 }
