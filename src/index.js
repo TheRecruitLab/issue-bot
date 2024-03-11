@@ -87,31 +87,25 @@ async function run() {
       }
     }
 
-  const { data: testing } = await octokit.rest.projects.get({
-    project_id: 2,
-  });
 
-
-console.log('testing', { ...testing });
-
-  //   await graphqlWithAuth(`
-  //   mutation {
-  //     updateProjectV2ItemFieldValue(
-  //       input: {
-  //         projectId: "PROJECT_ID"
-  //         itemId: "ITEM_ID"
-  //         fieldId: "FIELD_ID"
-  //         value: { 
-  //           singleSelectOptionId: "OPTION_ID"        
-  //         }
-  //       }
-  //     ) {
-  //       projectV2Item {
-  //         id
-  //       }
-  //     }
-  //   }
-  // `);
+    await graphqlWithAuth(`
+    mutation {
+      updateProjectV2ItemFieldValue(
+        input: {
+          projectId: "PROJECT_ID"
+          itemId: "ITEM_ID"
+          fieldId: "FIELD_ID"
+          value: { 
+            singleSelectOptionId: "OPTION_ID"        
+          }
+        }
+      ) {
+        projectV2Item {
+          id
+        }
+      }
+    }
+  `);
 
     console.log(`#${linkedIssue.number} was changed to ${issue.state}`);
   }
