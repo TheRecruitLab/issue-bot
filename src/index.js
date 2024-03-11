@@ -33,6 +33,11 @@ async function run() {
           closingIssuesReferences(first: 100) { 
             nodes { 
               number,
+              projects(first: 50) {
+                nodes {
+                  id
+                }
+              }
               projectsV2(first: 100) {
                 nodes {
                   id
