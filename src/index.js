@@ -77,13 +77,19 @@ async function run() {
   {
     organization(login: "${owner}") {
       projects(first: 100) {
-        id
+        nodes {
+          id
+        }
       },
       projectsV2(first:100) {
-        id
+        nodes {
+          id
+        }
       },
       repositories(first:100) {
-        id
+        nodes {
+          id
+        }
       },
       login
     }
