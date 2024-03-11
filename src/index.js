@@ -109,7 +109,8 @@ async function run() {
             project {
               id
             }
-          }
+          },
+          totalCount
         },
         projectItems(first: 50) {
           nodes {
@@ -117,12 +118,14 @@ async function run() {
             project {
               id
             }
-          }
+          },
+          totalCount
         },
         projectsV2(first: 100) {
           nodes {
             id
-          }
+          },
+          totalCount
         }
       },
       issues (last: 100) {
