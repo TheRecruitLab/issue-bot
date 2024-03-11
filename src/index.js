@@ -88,7 +88,7 @@ async function run() {
     }
 
   const { data: testing } = await octokit.rest.projects.get({
-    project_id: 'PVTI_lADOCI-95M4AUzl4zgNXQvM',
+    project_id: 2,
   });
 
 
