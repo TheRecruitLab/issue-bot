@@ -73,7 +73,6 @@ async function run() {
       }
     }
 
-    console.log(issueTesting);
   const { repository: testing } = await graphqlWithAuth(`
   {
     repository(owner: "${owner}", name: "${repo}") {
