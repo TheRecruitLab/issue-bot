@@ -33,7 +33,7 @@ async function run() {
           closingIssuesReferences(first: 100) { 
             nodes { 
               number,
-              projectV2 {
+              projectsV2 {
                 id,
               }
             },
