@@ -31,7 +31,8 @@ async function run() {
             login
           },
           closingIssuesReferences(first: 100) { 
-            nodes { 
+            nodes {
+              id,
               number,
               projectCards(first: 50) {
                 nodes {
@@ -86,12 +87,46 @@ async function run() {
       throw new Error('An issue attached to the Pull Request could not be found.');
     }
     console.log(linkedIssue);
+
     for (const project of (linkedIssue?.projectsV2?.nodes || [])) {
       console.log('PROJECT ID', project?.id);
       for (const field of (project?.fields?.nodes || [])) {
         console.log('FIELD', { ...field });
       }
     }
+
+
+  const { node: testing } = await graphqlWithAuth(`
+  {
+    node(id: "${linkedIssue.id}") {
+      id,
+      number,
+      projectCards(first: 50) {
+        nodes {
+          id,
+          project {
+            id
+          }
+        }
+      },
+      projectItems(first: 50) {
+        nodes {
+          id,
+          project {
+            id
+          }
+        }
+      },
+      projectsV2(first: 100) {
+        nodes {
+          id
+        }
+      }
+    },
+  }
+`);
+
+console.log('testing', { ...testing });
 
   //   await graphqlWithAuth(`
   //   mutation {
