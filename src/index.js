@@ -13,8 +13,6 @@ async function run() {
   const owner = context.payload?.repository?.owner?.login;
   const repo = context.payload?.repository?.name;
 
-  console.log('organization', context.payload?.organization);
-
   const graphqlWithAuth = graphql.defaults({
     headers: {
       authorization: `token ${githubToken}`,
@@ -78,21 +76,7 @@ async function run() {
   const { organization: testing } = await graphqlWithAuth(`
   {
     organization(login: "${owner}") {
-      projects(first: 100) {
-        nodes {
-          id
-        }
-      },
-      projectsV2(first:100) {
-        nodes {
-          id
-        }
-      },
-      repositories(first:100) {
-        nodes {
-          id
-        }
-      },
+      id,
       login
     }
   }
