@@ -124,9 +124,6 @@ async function handleStatusChange() {
     {
       organization(login: "${owner}") {
         id,
-        projects {
-          id
-        },
         projectsV2 {
           nodes {
             id
