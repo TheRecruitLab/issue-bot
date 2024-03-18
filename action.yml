@@ -12,6 +12,9 @@ inputs:
     description: 'The issue state to be set'
     required: true
     default: 'open'
+  operation:
+    description: 'The desired operation'
+    required: true
 runs:
   using: 'node20'
   main: './lib/index.js'
