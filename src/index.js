@@ -134,7 +134,7 @@ async function handleStatusChange() {
               nodes {
                 id
                 content {
-                  ...issue {
+                  ...on Issue {
                     title,
                     number
                   }
