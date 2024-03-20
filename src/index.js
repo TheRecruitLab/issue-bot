@@ -5,7 +5,6 @@ const { graphql } = require("@octokit/graphql");
 async function handleMergeOperation() {
   const githubToken = core.getInput('github_token');
   const state = core.getInput('state');
-  const requiresMerge = Boolean(core.getInput('requires_merge')) === 'true';
 
   const octokit = github.getOctokit(githubToken)
   const context = github.context;
@@ -79,9 +78,9 @@ async function handleMergeOperation() {
 
 async function handleStatusChange() {
   const githubToken = core.getInput('github_token');
-  const state = core.getInput('state');
+  const status = core.getInput('status');
+  const statusField = core.getInput('status_field') ?? 'Status';
 
-  const octokit = github.getOctokit(githubToken)
   const context = github.context;
 
   const owner = context.payload?.repository?.owner?.login;
@@ -107,11 +106,12 @@ async function handleStatusChange() {
             projectsV2(first: 100) {
               nodes {
                 id,
+                title,
                 field(name: "Status") {
                   ...on ProjectV2SingleSelectField {
                     id,
                     name,
-                    options (names: ["staging"]) {
+                    options (names: ["${status}"]) {
                       id,
                       name
                     }
@@ -125,7 +125,7 @@ async function handleStatusChange() {
                 project {
                   id
                 },
-                fieldValueByName(name: "status") {
+                fieldValueByName(name: "${statusField}") {
                   ...on ProjectV2ItemFieldSingleSelectValue {
                     id
                   }
@@ -144,13 +144,8 @@ async function handleStatusChange() {
 
   const linkedIssues = repository?.pullRequest?.closingIssuesReferences?.nodes || [];
 
-  console.log('repository', repository);
-  console.log('linked issues', linkedIssues);
-
   for (const linkedIssue of linkedIssues) {
     for (const project of (linkedIssue?.projectsV2?.nodes || [])) {
-      console.log('PROJECT ID', project?.id);
-      console.log('PROJECT FIELD', project.field);
 
       const projectItem = linkedIssue.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
       const [option] = (project?.field?.options || []);
@@ -174,6 +169,8 @@ async function handleStatusChange() {
             }
           }
         `);
+
+        console.log(`Successfully changed ${statusField} to ${status} on ${project?.title}`);
       }
     }
   }
