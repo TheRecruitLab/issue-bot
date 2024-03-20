@@ -148,9 +148,7 @@ async function handleStatusChange() {
 
     for (const project of (linkedIssue?.projectsV2?.nodes || [])) {
       console.log('PROJECT ID', project?.id);
-      for (const field of (project?.fields?.nodes || [])) {
-        console.log('FIELD', { ...field });
-      }
+      console.log('PROJECT FIELD', project.field);
     }
 
     for(const projectItem of (linkedIssue?.projectItems?.nodes || [])) {
