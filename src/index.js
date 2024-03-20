@@ -148,12 +148,11 @@ async function handleStatusChange() {
   console.log('linked issues', linkedIssues);
 
   for (const linkedIssue of linkedIssues) {
-
     for (const project of (linkedIssue?.projectsV2?.nodes || [])) {
       console.log('PROJECT ID', project?.id);
       console.log('PROJECT FIELD', project.field);
 
-      const projectItem = linkedIssue.projectItems?.find((projectItem) => projectItem?.project?.id === project?.id);
+      const projectItem = linkedIssue.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
       const [option] = (project?.field?.options || []);
 
       if (option && projectItem) {
