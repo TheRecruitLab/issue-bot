@@ -12,7 +12,7 @@ inputs:
     description: 'The issue status to be set'
     required: true
     default: 'staging'
-  statusField:
+  status_field:
     description: 'The issue status field to be set'
     required: true
     default: 'Status'
