@@ -2,30 +2,52 @@ const github = require('@actions/github');
 const core = require('@actions/core');
 const { graphql } = require("@octokit/graphql");
 
-async function handleMergeOperation() {
-  const githubToken = core.getInput('github_token');
-  const state = core.getInput('state');
+function getInputVars() {
+  return {
+    githubToken: core.getInput('github_token'),
+    state: core.getInput('state'),
+    status: core.getInput('status'),
+    statusField: core.getInput('status_field'),
+  }
+};
 
-  const octokit = github.getOctokit(githubToken)
+function getContextVars() {
   const context = github.context;
 
-  const owner = context.payload?.repository?.owner?.login;
-  const repo = context.payload?.repository?.name;
+  return {
+    owner: context.payload?.repository?.owner?.login,
+    repo: context.payload?.repository?.name,
+    payload: context.payload,
+  };
+}
 
+function getAPIClients(githubToken) {
+  const octokit = github.getOctokit(githubToken)
   const graphqlWithAuth = graphql.defaults({
     headers: {
       authorization: `token ${githubToken}`,
     },
   });
 
-  if (! context?.payload?.pull_request) {
+  return {
+    octokit,
+    graphqlWithAuth,
+  };
+}
+
+async function handlePRMergeOperation() {
+  const { githubToken, state } = getInputVars();
+  const { owner, repo, payload } = getContextVars();
+  const { octokit, graphqlWithAuth } = getAPIClients(githubToken);
+
+  if (! payload?.pull_request) {
       throw new Error('Invalid Github event. Must be a pull_request event.');
   }
 
   const { repository } = await graphqlWithAuth(`
     {
       repository(owner: "${owner}", name: "${repo}") {
-        pullRequest(number: ${context.payload.pull_request.number}) {
+        pullRequest(number: ${payload.pull_request.number}) {
           author {
             login
           },
@@ -76,26 +98,19 @@ async function handleMergeOperation() {
   }
 }
 
-async function handleStatusChange() {
-  const githubToken = core.getInput('github_token');
-  const status = core.getInput('status');
-  const statusField = core.getInput('status_field') ?? 'Status';
+async function handlePRStatusChange() {
+  const { githubToken, status, statusField } = getInputVars();
+  const { owner, repo, payload } = getContextVars();
+  const { graphqlWithAuth } = getAPIClients(githubToken);
 
-  const context = github.context;
-
-  const owner = context.payload?.repository?.owner?.login;
-  const repo = context.payload?.repository?.name;
-
-  const graphqlWithAuth = graphql.defaults({
-    headers: {
-      authorization: `token ${githubToken}`,
-    },
-  });
+  if (! payload?.pull_request) {
+    throw new Error('Invalid Github event. Must be a pull_request event.');
+}
 
   const { repository } = await graphqlWithAuth(`
   {
     repository(owner: "${owner}", name: "${repo}") {
-      pullRequest(number: ${context.payload.pull_request.number}) {
+      pullRequest(number: ${payload.pull_request.number}) {
         author {
           login
         },
@@ -176,23 +191,9 @@ async function handleStatusChange() {
   }
 }
 
-async function handleOperation (operation) {
-  switch (operation) {
-    case 'merge':
-      await handleMergeOperation();
-      break;
-    case 'status_change':
-      await handleStatusChange();
-      break;
-    default:
-      console.error('Invalid Operation');
-  }
-}
-
 async function run() {
-  const operation = core.getInput('operation');
-
-  await handleOperation(operation);
+  await handlePRMergeOperation();
+  await handlePRStatusChange();
 }
 
 run();
