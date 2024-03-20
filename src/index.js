@@ -122,6 +122,9 @@ async function handleStatusChange() {
             projectItems(first: 100) {
               nodes {
                 id,
+                project {
+                  id
+                },
                 fieldValueByName(name: "status") {
                   ...on ProjectV2ItemFieldSingleSelectValue {
                     id
@@ -149,32 +152,32 @@ async function handleStatusChange() {
     for (const project of (linkedIssue?.projectsV2?.nodes || [])) {
       console.log('PROJECT ID', project?.id);
       console.log('PROJECT FIELD', project.field);
-    }
 
-    for(const projectItem of (linkedIssue?.projectItems?.nodes || [])) {
-      console.log('PROJECT ITEM', projectItem.id, projectItem.fieldValueByName);
+      const projectItem = linkedIssue.projectItems?.find((projectItem) => projectItem?.project?.id === project?.id);
+      const [option] = (project?.field?.options || []);
+
+      if (option && projectItem) {
+        await graphqlWithAuth(`
+          mutation {
+            updateProjectV2ItemFieldValue(
+              input: {
+                projectId: "${project?.id}"
+                itemId: "${projectItem.id}"
+                fieldId: "${project?.field?.id}"
+                value: { 
+                  singleSelectOptionId: "${option.id}"        
+                }
+              }
+            ) {
+              projectV2Item {
+                id
+              }
+            }
+          }
+        `);
+      }
     }
   }
-
-
-//   await graphqlWithAuth(`
-//   mutation {
-//     updateProjectV2ItemFieldValue(
-//       input: {
-//         projectId: "PVTI_lADOCI-95M4AUzl4zgNXQvM'"
-//         itemId: "ITEM_ID"
-//         fieldId: "FIELD_ID"
-//         value: { 
-//           singleSelectOptionId: "OPTION_ID"        
-//         }
-//       }
-//     ) {
-//       projectV2Item {
-//         id
-//       }
-//     }
-//   }
-// `);
 }
 
 async function handleOperation (operation) {
