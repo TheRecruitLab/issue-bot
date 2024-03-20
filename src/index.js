@@ -107,7 +107,7 @@ async function handleStatusChange() {
             projectsV2(first: 100) {
               nodes {
                 id,
-                field(name: "status") {
+                field(name: "Status") {
                   ...on ProjectV2SingleSelectField {
                     id,
                     name,
