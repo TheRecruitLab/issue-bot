@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "ncc build src -o lib"
+    "build": "ncc build src -o lib",
+    "server": "node src/app.js"
   },
   "repository": {
     "type": "git",

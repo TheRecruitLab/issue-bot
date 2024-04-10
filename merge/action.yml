@@ -1,0 +1,21 @@
+name: 'Update Github Issue State'
+description: 'Modify the state of a github issue'
+inputs:
+  github_token:
+    description: 'The github token'
+    required: true
+  state:
+    description: 'The issue state to be set'
+    required: true
+    default: 'open'
+  status:
+    description: 'The issue status to be set'
+    required: true
+    default: 'staging'
+  status_field:
+    description: 'The issue status field to be set'
+    required: true
+    default: 'Status'
+runs:
+  using: 'node20'
+  main: './lib/merge.js'
