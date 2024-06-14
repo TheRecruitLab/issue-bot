@@ -1,6 +1,20 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
-import { getAPIClients } from './utils';
+import { graphql } from "@octokit/graphql"
+
+export function getAPIClients(githubToken) {
+    const octokit = github.getOctokit(githubToken)
+    const graphqlWithAuth = graphql.defaults({
+        headers: {
+        authorization: `token ${githubToken}`,
+        },
+    });
+
+    return {
+        octokit,
+        graphqlWithAuth,
+    };
+};
 
 function getInputVars() {
   return {
