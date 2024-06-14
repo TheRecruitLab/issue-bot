@@ -1,0 +1,26 @@
+name: Tests
+
+on:
+  issue:
+    types: [opened, reopened, edited]
+
+jobs:
+  handle_merge_to_dev:
+    if: github.event.pull_request.merged && github.event.pull_request.base.ref == 'dev'
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+        - name: Generate token
+          id: generate-token
+          uses: actions/create-github-app-token@v1
+          with:
+            app-id: '859026'
+            private-key: ${{ secrets.APP_PEM }}
+            owner: ${{ github.repository_owner }}
+        - name: Testing
+          uses: TheRecruitLab/issue-bot@main
+          with:
+              github_token: ${{ steps.generate-token.outputs.token }}
+              state: 'open'
+              status: 'Dev'
+              operation: 'status_change'
