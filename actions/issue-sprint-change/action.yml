@@ -1,0 +1,9 @@
+name: 'Update Github Issue State'
+description: 'Modify the state of a github issue'
+inputs:
+  github_token:
+    description: 'The github token'
+    required: true
+runs:
+  using: 'node20'
+  main: './lib/issue-change/index.js'

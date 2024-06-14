@@ -18,4 +18,4 @@ inputs:
     default: 'Status'
 runs:
   using: 'node20'
-  main: './lib/status-change.js'
+  main: './lib/status-change/index.js'

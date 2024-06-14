@@ -1,6 +1,20 @@
-const github = require('@actions/github');
-const core = require('@actions/core');
-const { graphql } = require("@octokit/graphql");
+import * as github from '@actions/github';
+import * as core from '@actions/core';
+import { graphql } from "@octokit/graphql"
+
+export function getAPIClients(githubToken) {
+    const octokit = github.getOctokit(githubToken)
+    const graphqlWithAuth = graphql.defaults({
+        headers: {
+        authorization: `token ${githubToken}`,
+        },
+    });
+
+    return {
+        octokit,
+        graphqlWithAuth,
+    };
+};
 
 function getInputVars() {
   return {
@@ -21,22 +35,8 @@ function getContextVars() {
   };
 }
 
-function getAPIClients(githubToken) {
-  const octokit = github.getOctokit(githubToken)
-  const graphqlWithAuth = graphql.defaults({
-    headers: {
-      authorization: `token ${githubToken}`,
-    },
-  });
-
-  return {
-    octokit,
-    graphqlWithAuth,
-  };
-}
-
 async function handlePRMergeOperation() {
-  const { githubToken, state } = getInputVars();
+  const { githubToken, state } = getContextVars();
   const { owner, repo, payload } = getContextVars();
   const { octokit, graphqlWithAuth } = getAPIClients(githubToken);
 
@@ -191,9 +191,9 @@ async function handlePRStatusChange() {
   }
 }
 
-async function run() {
+async function run () {
   await handlePRMergeOperation();
   await handlePRStatusChange();
-}
+};
 
 run();
