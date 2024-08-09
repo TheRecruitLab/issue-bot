@@ -21,7 +21,8 @@ jobs:
                 private-key: ${{ secrets.APP_PEM }}
                 owner: ${{ github.repository_owner }}
             - name: Testing
-              uses: TheRecruitLab/issue-bot/actions/create-pr-if-out-of-sync@feature/10/create-pr-when-branch-not-in-sync
+              uses: TheRecruitLab/issue-bot@feature/10/create-pr-when-branch-not-in-sync
+              uses: ./actions/create-pr-if-out-of-sync
               with:
                   github_token: ${{ steps.generate-token.outputs.token }}
                   to: 'main'
