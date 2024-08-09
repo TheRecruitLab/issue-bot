@@ -3,6 +3,8 @@ name: Tests
 on:
   issues:
     types: [opened, reopened, edited]
+  project_column:
+    types: ['created', 'updated', 'moved']
 
 jobs:
   handle_merge_to_dev:
@@ -18,7 +20,8 @@ jobs:
             private-key: ${{ secrets.APP_PEM }}
             owner: ${{ github.repository_owner }}
         - name: Testing
-          uses: TheRecruitLab/issue-bot@main
+          uses: TheRecruitLab/issue-bot@feature/3/comment-when-moving-an-issue-in-and-out-of-sprint
+          uses: ./actions/issue-sprint-change/action
           with:
               github_token: ${{ steps.generate-token.outputs.token }}
               state: 'open'
