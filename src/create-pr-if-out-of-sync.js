@@ -40,7 +40,7 @@ async function getListOfPullRequests(octokit, { owner, repo }) {
     owner,
     repo,
   });
-  
+
   return pullRequests.data.map(({ base, head }) => ({ base, head }));
 };
  
@@ -63,7 +63,11 @@ async function handlePRMergeOperation() {
     return pullRequest.base.ref === to && pullRequest.head.ref === from;
   });
 
-  console.log({ data, foundPR });
+
+  for(const el of data) {
+    console.log(el.base, el.head);
+  }
+  console.log({ foundPR });
 
   // Check if PR exists
 
