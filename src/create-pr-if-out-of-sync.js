@@ -3,10 +3,11 @@ import * as core from '@actions/core';
 import { graphql } from "@octokit/graphql"
 
 export function getAPIClients(githubToken) {
+    console.log('token' + githubToken?.length);
     const octokit = github.getOctokit(githubToken)
     const graphqlWithAuth = graphql.defaults({
         headers: {
-        authorization: `token ${githubToken}`,
+          authorization: `token ${githubToken}`,
         },
     });
 
