@@ -8,6 +8,6 @@ do
     echo "$file  | $filename"
     if [ "$filename" != 'utils'] -a ["$filename" != 'index' ] 
     then
-        ncc build "$file" -o lib/"$filename" -m
+        ncc build "$file" -o lib/"$filename"
     fi
 done;
