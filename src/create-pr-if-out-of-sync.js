@@ -40,7 +40,7 @@ async function getListOfPullRequests(octokit, { owner, repo }) {
     owner,
     repo,
   });
-
+  console.log(pullRequests[0]);
   return pullRequests.map(({ base, head }) => ({ base, head }));
 };
  
