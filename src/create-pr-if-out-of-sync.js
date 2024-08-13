@@ -37,7 +37,7 @@ function getContextVars() {
 
 async function handlePRMergeOperation() {
   console.log('1');
-  const { githubToken, from, to } = getContextVars(); console.log('2');
+  const { githubToken, from, to } = getInputVars(); console.log('2');
   const { owner, repo, payload } = getContextVars(); console.log('3');
   const { octokit, graphqlWithAuth } = getAPIClients(githubToken); console.log('4');
 
