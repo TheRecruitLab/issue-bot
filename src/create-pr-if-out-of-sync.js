@@ -35,9 +35,10 @@ function getContextVars() {
 }
 
 async function handlePRMergeOperation() {
-  const { githubToken, from, to } = getContextVars();
-  const { owner, repo, payload } = getContextVars();
-  const { octokit, graphqlWithAuth } = getAPIClients(githubToken);
+  console.log('1');
+  const { githubToken, from, to } = getContextVars(); console.log('2');
+  const { owner, repo, payload } = getContextVars(); console.log('3');
+  const { octokit, graphqlWithAuth } = getAPIClients(githubToken); console.log('4');
 
   if (! payload?.pull_request) {
       throw new Error('Invalid Github event. Must be a pull_request event.');
@@ -101,6 +102,7 @@ async function handlePRMergeOperation() {
 }
 
 async function run () {
+  console.log('begin');
   await handlePRMergeOperation();
 };
 
