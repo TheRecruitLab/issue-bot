@@ -14,4 +14,4 @@ inputs:
     default: 'staging'
 runs:
   using: 'node20'
-  main: '../lib/create-pr-if-out-of-sync/index.js'
+  main: '../lib/handle-branch-prs/index.js'
