@@ -88,7 +88,7 @@ function parseCommitMessages(messages = [])
 }
 
 async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open' }) {
-  const pullRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
+  return octokit.request('GET /repos/{owner}/{repo}/pulls', {
     owner,
     repo,
     base: 'production',
@@ -97,9 +97,9 @@ async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open
     sort: 'created',
     direction: 'desc',
   });
-
-  return pullRequests.data.map(({ base, head }) => ({ base, head }));
 };
+
+
 
 async function compareBranches({ octokit, owner, repo, base, head }) {
   const response = await octokit.request('GET /repos/{owner}/{repo}/compare/{basehead}', {
@@ -126,7 +126,7 @@ async function createPullRequest({ octokit, owner, repo, base, head }) {
 
 async function updatePullRequest({ octokit, owner, repo, pull_number, body })
 {
-  const response = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+  return octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
     owner,
     repo,
     pull_number,
@@ -136,15 +136,13 @@ async function updatePullRequest({ octokit, owner, repo, pull_number, body })
 
 async function getPullRequestCommits({ octokit, owner, repo, pull_number, page = 1 })
 {
-  const response = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {
+  return octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {
     owner,
     repo,
     pull_number,
     per_page: 100,
     page,
   });
-
-  return response.data?.map((commit) => ({ message: commit?.commit?.message }))
 }
  
 async function handlePRSync() {
@@ -183,9 +181,10 @@ async function handlePRSync() {
 
   console.log('Fetching commit messages');
   const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.issue_number });
+  const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.commit?.message }));
 
   console.log('Parsing Commit messages');
-  const pullRequestBody = parseCommitMessages(commitMessages);
+  const pullRequestBody = parseCommitMessages(mappedCommitMessages);
 
   console.log('Syncing commit messages to pull request body');
   await updatePullRequest({ octokit, owner, repo, pull_number: pullRequest?.issue_number, body: pullRequestBody });
