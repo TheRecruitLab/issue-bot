@@ -1,6 +1,11 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
 import { graphql } from "@octokit/graphql"
+import { getListOfPullRequests } from './api/getListOfPullRequests';
+import { createPullRequest } from './createPullRequest';
+import { getPullRequestCommits } from './api/getPullRequestCommits';
+import { updatePullRequest } from './api/updatePullRequest';
+import { compareBranches } from './api/compareBranches';
 
 export function getAPIClients(githubToken) {
     const octokit = github.getOctokit(githubToken)
@@ -34,7 +39,7 @@ function getContextVars() {
   };
 };
 
-function capitalize(value) {
+export function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
@@ -48,8 +53,7 @@ async function getChunkedData(callbackFn, params)
   while (pagesRemaining) {
     const response = await callbackFn({ ...params, page });
 
-    const parsedData = parseData(response.data)
-    data = [...data, ...parsedData];
+    data = data.append(response.data ?? []);
 
     const linkHeader = response.headers.link;
 
@@ -87,66 +91,6 @@ function parseCommitMessages(messages = [])
   }, '');
 }
 
-async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open' }) {
-  const pullRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
-    owner,
-    repo,
-    base: 'production',
-    state,
-    per_page: 100,
-    sort: 'created',
-    direction: 'desc',
-  });
-
-  return pullRequests.data.map(({ base, head }) => ({ base, head }));
-};
-
-async function compareBranches({ octokit, owner, repo, base, head }) {
-  const response = await octokit.request('GET /repos/{owner}/{repo}/compare/{basehead}', {
-    owner,
-    repo,
-    basehead: `${base}...${head}`,
-  });
-
-  return response.data;
-};
-
-async function createPullRequest({ octokit, owner, repo, base, head }) {
-  const response = await octokit.request('POST /repos/{owner}/{repo}/pulls', {
-    owner,
-    repo,
-    title: `${capitalize(head)} -> ${capitalize(base)}`,
-    body: '',
-    head,
-    base,
-  });
-
-  return response.data;
-}
-
-async function updatePullRequest({ octokit, owner, repo, pull_number, body })
-{
-  const response = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
-    owner,
-    repo,
-    pull_number,
-    body,
-  });
-}
-
-async function getPullRequestCommits({ octokit, owner, repo, pull_number, page = 1 })
-{
-  const response = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {
-    owner,
-    repo,
-    pull_number,
-    per_page: 100,
-    page,
-  });
-
-  return response.data?.map((commit) => ({ message: commit?.commit?.message }))
-}
- 
 async function handlePRSync() {
   const { githubToken, from, to } = getInputVars();
   const { owner, repo, payload } = getContextVars();
