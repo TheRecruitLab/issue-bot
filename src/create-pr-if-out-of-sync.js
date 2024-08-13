@@ -35,6 +35,15 @@ function getContextVars() {
   };
 }
 
+async function getListOfPullRequests({ owner, repo }) {
+  const pullRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
+    owner,
+    repo,
+  });
+
+  return pullRequests.map(({ base, head }) => { base, head });
+};
+ 
 async function handlePRMergeOperation() {
   console.log('1');
   const { githubToken, from, to } = getInputVars(); console.log('2');
@@ -49,16 +58,14 @@ async function handlePRMergeOperation() {
   console.log(payload?.pull_request);
 
   // Check branches are out of date
-  const data = await octokit.request('GET /repos/{owner}/{repo}/compare/{basehead}', {
-    owner,
-    repo,
-    basehead: `${from}...${to}`,
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
+  const data = await getListOfPullRequests({ owner, repo });
+  const foundPR = data.find((pullRequest) => {
+    return pullRequest.base.ref === to && pullRequest.head.ref === from;
   });
 
-  console.log(data);
+  console.log({ data, foundPR });
+
+  if (data.some())
 
   // Check if PR exists
 
