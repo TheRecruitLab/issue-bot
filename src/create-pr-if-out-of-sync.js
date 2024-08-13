@@ -3,7 +3,6 @@ import * as core from '@actions/core';
 import { graphql } from "@octokit/graphql"
 
 export function getAPIClients(githubToken) {
-    console.log('token' + githubToken?.length);
     const octokit = github.getOctokit(githubToken)
     const graphqlWithAuth = graphql.defaults({
         headers: {
@@ -39,7 +38,56 @@ function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
-async function getListOfPullRequests(octokit, { owner, repo, base, state = 'open' }) {
+async function getChunkedData(callbackFn, params)
+{
+  const nextPattern = /(?<=<)([\S]*)(?=>; rel="Next")/i;
+  let pagesRemaining = true;
+  let data = [];
+  let page = 1;
+
+  while (pagesRemaining) {
+    const response = await callbackFn({ ...params, page });
+
+    const parsedData = parseData(response.data)
+    data = [...data, ...parsedData];
+
+    const linkHeader = response.headers.link;
+
+    pagesRemaining = linkHeader && linkHeader.includes(`rel=\"next\"`);
+
+    if (pagesRemaining) {
+      url = linkHeader.match(nextPattern)[0];
+      page++;
+    }
+  }
+
+  return data;
+};
+
+function parseCommitMessages(messages = [])
+{
+  const regexChecks = [/\/([0-9]{0,9})\//g, /\|([0-9]{0,9})\|/g];
+
+  return messages.reduce((prev, curr) => {
+    const trimmedStr = curr.replace(/\s+/g, '');
+
+    for(const check of regexChecks) {
+      const matches = trimmedStr.match(check);
+
+      for(const match of matches) {
+        const issueNumberMatch = match.match(/[0-9]{1,9}/g);
+
+        if (issueNumberMatch?.length) {
+          prev += `* #${issueNumberMatch[0]}\n`;
+        }
+      }
+    }
+
+    return prev;
+  }, '');
+}
+
+async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open' }) {
   const pullRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
     owner,
     repo,
@@ -53,7 +101,7 @@ async function getListOfPullRequests(octokit, { owner, repo, base, state = 'open
   return pullRequests.data.map(({ base, head }) => ({ base, head }));
 };
 
-async function compareBranches(octokit, { owner, repo, base, head }) {
+async function compareBranches({ octokit, owner, repo, base, head }) {
   const response = await octokit.request('GET /repos/{owner}/{repo}/compare/{basehead}', {
     owner,
     repo,
@@ -63,7 +111,7 @@ async function compareBranches(octokit, { owner, repo, base, head }) {
   return response.data;
 };
 
-async function createPullRequest(octokit, { owner, repo, base, head }) {
+async function createPullRequest({ octokit, owner, repo, base, head }) {
   const response = await octokit.request('POST /repos/{owner}/{repo}/pulls', {
     owner,
     repo,
@@ -75,25 +123,49 @@ async function createPullRequest(octokit, { owner, repo, base, head }) {
 
   return response.data;
 }
+
+async function updatePullRequest({ octokit, owner, repo, pull_number, body })
+{
+  const response = await octokit.request('PATCH /repos/{owner}/{repo}/pulls/{pull_number}', {
+    owner,
+    repo,
+    pull_number,
+    body,
+  });
+}
+
+async function getPullRequestCommits({ octokit, owner, repo, pull_number, page = 1 })
+{
+  const response = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {
+    owner,
+    repo,
+    pull_number,
+    per_page: 100,
+    page,
+  });
+
+  return response.data?.map((commit) => ({ message: commit?.commit?.message }))
+}
  
 async function handlePRSync() {
-  console.log('1');
-  const { githubToken, from, to } = getInputVars(); console.log('2');
-  const { owner, repo, payload } = getContextVars(); console.log('3');
-  const { octokit, graphqlWithAuth } = getAPIClients(githubToken); console.log('4');
-
+  const { githubToken, from, to } = getInputVars();
+  const { owner, repo, payload } = getContextVars();
+  const { octokit } = getAPIClients(githubToken);
+  
   if (! payload?.pull_request) {
-      throw new Error('Invalid Github event. Must be a pull_request event.');
+    throw new Error('Invalid Github event. Must be a pull_request event.');
   }
+  
+  const baseParams = { octokit, owner, repo };
 
   // Create PR if branches are out of date
-  const data = await getListOfPullRequests(octokit, { owner, repo, base: to });
+  const data = await getChunkedData(getListOfPullRequests, { ...baseParams, base: to });
   let pullRequest = data.find(({ base, head }) => base.ref === to && head.ref === from);
 
   console.log(`PR Exists: ${Boolean(pullRequest)}`);
 
   if (! pullRequest) {
-    const comparison = await compareBranches(octokit, { owner, repo, base: to, head: from });
+    const comparison = await compareBranches({ ...baseParams, base: to, head: from });
     const branchesNotInSync = comparison?.ahead_by !== 0 || comparison?.ahead_by !== 0;
 
     console.log(`PR In sync: ${!Boolean(branchesNotInSync)}`);
@@ -101,72 +173,18 @@ async function handlePRSync() {
     if (comparison?.ahead_by !== 0 || comparison?.ahead_by !== 0) {
       console.log('Creating Pull Request.');
 
-      pullRequest = await createPullRequest(octokit, { owner, repo, base: to, head: from });
+      pullRequest = await createPullRequest({ ...baseParams, base: to, head: from });
     }
   }
 
   console.log('Fetching commit messages');
+  const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.issue_number });
 
-  console.log('Syncing commit messages');
+  console.log('Parsing Commit messages');
+  const pullRequestBody = parseCommitMessages(commitMessages);
 
-
-
-  // Check if PR exists
-
-  // Create PR if not exists 
-
-  // const { repository } = await graphqlWithAuth(`
-  //   {
-  //     repository(owner: "${owner}", name: "${repo}") {
-  //       pullRequest(number: ${payload.pull_request.number}) {
-  //         author {
-  //           login
-  //         },
-  //         closingIssuesReferences(first: 100) { 
-  //           nodes {
-  //             id,
-  //             number,
-  //             projectsV2(first: 100) {
-  //               nodes {
-  //                 id
-  //               }
-  //             },
-  //             projectItems(first: 100) {
-  //               edges {
-  //                 cursor,
-  //                 node {
-  //                   id,
-  //                   isArchived
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         },
-  //         id,
-  //         merged,
-  //         number,
-  //         state,
-  //       }
-  //     }
-  //   }
-  // `);
-
-  // const linkedIssues = repository?.pullRequest?.closingIssuesReferences?.nodes || [];
-
-  // for (const linkedIssue of linkedIssues) {
-  //   const { data: issue } = await octokit.rest.issues.update({
-  //     repo,
-  //     owner,
-  //     issue_number: linkedIssue.number,
-  //     state,
-  //   });
-
-  //   if (! issue) {
-  //     console.error('An issue attached to the Pull Request could not be found.');
-  //   }
-
-  //   console.log(`#${linkedIssue.number} was changed to ${issue.state}`);
-  // }
+  console.log('Syncing commit messages to pull request body');
+  await updatePullRequest({ octokit, owner, repo, pull_number: pullRequest?.issue_number, body: pullRequestBody });
 }
 
 async function run () {
