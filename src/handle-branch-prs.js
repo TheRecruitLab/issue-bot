@@ -34,6 +34,15 @@ function getContextVars() {
   };
 };
 
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+};
+
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
@@ -67,8 +76,9 @@ async function getChunkedData(callbackFn, params)
 function parseCommitMessages(messages = [])
 {
   const regexChecks = [/\/([0-9]{0,9})\//g, /\|([0-9]{0,9})\|/g];
+  const issues = [];
 
-  return messages.reduce((prev, curr) => {
+  const message = messages.reduce((prev, curr) => {
     const trimmedStr = curr.replace(/\s+/g, '');
 
     for(const check of regexChecks) {
@@ -78,6 +88,7 @@ function parseCommitMessages(messages = [])
         const issueNumberMatch = match.match(/[0-9]{1,9}/g);
 
         if (issueNumberMatch?.length) {
+          issueNumbers.push(issueNumberMatch[0]);
           prev += `* #${issueNumberMatch[0]}\n`;
         }
       }
@@ -85,6 +96,82 @@ function parseCommitMessages(messages = [])
 
     return prev;
   }, '');
+
+  return { message, issues };
+}
+
+async function getIssuesWithProjectInfo({graphqlWithAuth, owner, repo, issues, status, statusField })
+{
+  const issuesWithProjectInfo = [];
+
+  for(const issue of issues) {
+    const { repository } = await graphqlWithAuth(`
+      {
+        repository(owner: "${owner}", name: "${repo}") {
+          issue(number: ${issue}) { 
+            id,
+            number,
+            projectsV2(first: 100) {
+              nodes {
+                id,
+                title,
+                field(name: "Status") {
+                  ...on ProjectV2SingleSelectField {
+                    id,
+                    name,
+                    options (names: ["${status}"]) {
+                      id,
+                      name
+                    }
+                  }
+                }
+              },
+              projectItems(first: 100) {
+                nodes {
+                  id,
+                  project {
+                    id
+                  },
+                  fieldValueByName(name: "${statusField}") {
+                    ...on ProjectV2ItemFieldSingleSelectValue {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          },
+        }
+      }`);
+
+    issuesWithProjectInfo.push(repository.issue);
+
+    sleep(500); // There could be a lot of issues to link, so let's throttle this to 2 per second
+  }
+  
+  return issuesWithProjectInfo;
+};
+
+async function updateProjectItemValue({ graphqlWithAuth, project, projectItem, option })
+{
+  await graphqlWithAuth(`
+    mutation {
+      updateProjectV2ItemFieldValue(
+        input: {
+          projectId: "${project?.id}"
+          itemId: "${projectItem.id}"
+          fieldId: "${project?.field?.id}"
+          value: { 
+            singleSelectOptionId: "${option.id}"        
+          }
+        }
+      ) {
+        projectV2Item {
+          id
+        }
+      }
+    }
+  `);
 }
 
 async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open' }) {
@@ -98,8 +185,6 @@ async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open
     direction: 'desc',
   });
 };
-
-
 
 async function compareBranches({ octokit, owner, repo, base, head }) {
   const response = await octokit.request('GET /repos/{owner}/{repo}/compare/{basehead}', {
@@ -148,22 +233,23 @@ async function getPullRequestCommits({ octokit, owner, repo, pull_number, page =
 async function handlePRSync() {
   const { githubToken, from, to } = getInputVars();
   const { owner, repo, payload } = getContextVars();
-  const { octokit } = getAPIClients(githubToken);
+  const { octokit, graphqlWithAuth } = getAPIClients(githubToken);
   
   if (! payload?.pull_request) {
     throw new Error('Invalid Github event. Must be a pull_request event.');
   }
   
-  const baseParams = { octokit, owner, repo };
+  const baseRestParams = { octokit, owner, repo };
+  const baseGraphqlParams = { graphqlWithAuth, owner, repo };
 
   // Create PR if branches are out of date
-  const data = await getChunkedData(getListOfPullRequests, { ...baseParams, base: to });
+  const data = await getChunkedData(getListOfPullRequests, { ...baseRestParams, base: to });
   let pullRequest = data.find(({ base, head }) => base.ref === to && head.ref === from);
 
   console.log(`PR Exists: ${Boolean(pullRequest)}`);
 
   if (! pullRequest) {
-    const comparison = await compareBranches({ ...baseParams, base: to, head: from });
+    const comparison = await compareBranches({ ...baseRestParams, base: to, head: from });
     const branchesNotInSync = comparison?.ahead_by !== 0 || comparison?.behind_by !== 0;
 
     console.log(`PR In sync: ${!Boolean(branchesNotInSync)} | Ahead by: ${comparison?.ahead_by} | Behind by: ${comparison?.behind_by}`);
@@ -171,7 +257,7 @@ async function handlePRSync() {
     if (branchesNotInSync) {
       console.log('Creating Pull Request.');
 
-      pullRequest = await createPullRequest({ ...baseParams, base: to, head: from });
+      pullRequest = await createPullRequest({ ...baseRestParams, base: to, head: from });
     }
   }
 
@@ -180,14 +266,45 @@ async function handlePRSync() {
   }
 
   console.log('Fetching commit messages');
-  const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.issue_number });
+  const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseRestParams, pull_number: pullRequest?.issue_number });
   const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.commit?.message }));
 
   console.log('Parsing Commit messages');
-  const pullRequestBody = parseCommitMessages(mappedCommitMessages);
+  const { issues: issueNumbers, message: pullRequestBody } = parseCommitMessages(mappedCommitMessages);
 
   console.log('Syncing commit messages to pull request body');
-  await updatePullRequest({ octokit, owner, repo, pull_number: pullRequest?.issue_number, body: pullRequestBody });
+  await updatePullRequest({ 
+    ...baseRestParams, 
+    pull_number: pullRequest?.issue_number, 
+    body: pullRequestBody, 
+  });
+
+  console.log('Retrieving issue information');
+  const issues = await getIssuesWithProjectInfo({ 
+    ...baseGraphqlParams, 
+    issues: issueNumbers, 
+    status: to, 
+    statusField: 'Status',
+  });
+
+  for (const issue of issues) {
+    for (const project of (issue?.projectsV2?.nodes || [])) {
+
+      const projectItem = issue.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
+      const [option] = (project?.field?.options || []);
+
+      if (option && projectItem) {
+        await updateProjectItemValue({ 
+          graphqlWithAuth, 
+          project, 
+          projectItem, 
+          option, 
+        });
+
+        console.log(`Successfully changed ${statusField} to ${status} on ${project?.title} for issue #${issue?.number}`);
+      }
+    }
+  }
 }
 
 async function run () {
