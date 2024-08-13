@@ -164,9 +164,9 @@ async function handlePRSync() {
 
   if (! pullRequest) {
     const comparison = await compareBranches({ ...baseParams, base: to, head: from });
-    const branchesNotInSync = comparison?.ahead_by !== 0 || comparison?.ahead_by !== 0;
+    const branchesNotInSync = comparison?.ahead_by !== 0 || comparison?.behind_by !== 0;
 
-    console.log(`PR In sync: ${!Boolean(branchesNotInSync)}`);
+    console.log(`PR In sync: ${!Boolean(branchesNotInSync)} | Ahead by: ${comparison?.ahead_by} | Behind by: ${comparison?.behind_by}`);
     
     if (comparison?.ahead_by !== 0 || comparison?.ahead_by !== 0) {
       console.log('Creating Pull Request.');
