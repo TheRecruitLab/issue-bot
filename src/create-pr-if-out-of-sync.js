@@ -65,8 +65,6 @@ async function handlePRMergeOperation() {
 
   console.log({ data, foundPR });
 
-  if (data.some())
-
   // Check if PR exists
 
   // Create PR if not exists 
