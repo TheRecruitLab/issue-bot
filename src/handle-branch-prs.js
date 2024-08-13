@@ -177,6 +177,10 @@ async function handlePRSync() {
     }
   }
 
+  if (! pullRequest) {
+    return;
+  }
+
   console.log('Fetching commit messages');
   const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.issue_number });
 
