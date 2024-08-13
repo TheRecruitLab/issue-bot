@@ -35,13 +35,13 @@ function getContextVars() {
   };
 }
 
-async function getListOfPullRequests({ owner, repo }) {
+async function getListOfPullRequests(octokit, { owner, repo }) {
   const pullRequests = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
     owner,
     repo,
   });
 
-  return pullRequests.map(({ base, head }) => { base, head });
+  return pullRequests.map(({ base, head }) => ({ base, head }));
 };
  
 async function handlePRMergeOperation() {
@@ -58,7 +58,7 @@ async function handlePRMergeOperation() {
   console.log(payload?.pull_request);
 
   // Check branches are out of date
-  const data = await getListOfPullRequests({ owner, repo });
+  const data = await getListOfPullRequests(octokit, { owner, repo });
   const foundPR = data.find((pullRequest) => {
     return pullRequest.base.ref === to && pullRequest.head.ref === from;
   });
