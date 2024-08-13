@@ -40,9 +40,8 @@ async function getListOfPullRequests(octokit, { owner, repo }) {
     owner,
     repo,
   });
-  console.log('-----------------');
-  console.log(pullRequests, Array.isArray(pullRequests));
-  return pullRequests.map(({ base, head }) => ({ base, head }));
+  
+  return pullRequests.data.map(({ base, head }) => ({ base, head }));
 };
  
 async function handlePRMergeOperation() {
