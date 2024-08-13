@@ -67,7 +67,11 @@ async function handlePRMergeOperation() {
     console.log(el.base.ref, el.head.ref);
   }
 
-  console.log({ foundPR });
+  console.log({ foundPR, data });
+
+  if (! foundPR) {
+
+  }
 
   // Check if PR exists
 
