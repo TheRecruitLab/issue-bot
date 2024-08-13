@@ -80,7 +80,7 @@ async function handlePRMergeOperation() {
   console.log({ foundPR, data });
 
   if (! foundPR) {
-    const comparison = await compareBranches(octokit, { owner, repo, base: to, head });
+    const comparison = await compareBranches(octokit, { owner, repo, base: to, head: from });
     console.log(comparison);
   }
 
