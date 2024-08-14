@@ -51,8 +51,6 @@ async function getChunkedData(callbackFn, params)
 
     const linkHeader = response.headers?.link;
 
-    console.log(response);
-
     pagesRemaining = linkHeader && linkHeader.includes(`rel=\"next\"`);
 
     if (pagesRemaining) {
@@ -67,7 +65,7 @@ async function getChunkedData(callbackFn, params)
 function parseCommitMessages(messages = [])
 {
   const regexChecks = [/\/([0-9]{0,9})\//g, /\|([0-9]{0,9})\|/g];
-
+  console.log(messages);
   return messages.reduce((prev, curr) => {
     const trimmedStr = curr.replace(/\s+/g, '');
 
