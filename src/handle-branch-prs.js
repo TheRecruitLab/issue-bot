@@ -94,7 +94,7 @@ function parseCommitMessages(messages = [])
   }
 
   return { 
-    message: issueNumbers.reduce((prev, curr) => `${prev}* #${curr}\n`, ''), 
+    message: issues.reduce((prev, curr) => `${prev}* #${curr}\n`, ''), 
     issues,
   };
 }
