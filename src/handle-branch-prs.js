@@ -172,7 +172,7 @@ async function handlePRSync() {
     if (comparison?.ahead_by !== 0) {
       console.log('Creating Pull Request.');
 
-      pullRequest = await createPullRequest({ ...baseRestParams, base: to, head: from });
+      pullRequest = await createPullRequest({ ...baseParams, base: to, head: from });
     }
   }
 
