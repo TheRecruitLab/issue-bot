@@ -161,7 +161,6 @@ async function handlePRSync() {
   let pullRequest = data.find(({ base, head }) => base.ref === to && head.ref === from);
 
   console.log(`PR Exists: ${Boolean(pullRequest)}`);
-  console.log(pull);
 
   if (! pullRequest) {
     const comparison = await compareBranches({ ...baseParams, base: to, head: from });
@@ -181,7 +180,7 @@ async function handlePRSync() {
     return;
   }
 
-  console.log('Fetching commit messages');
+  console.log(`Fetching commit messages for PR #${pullRequest?.number}`);
   const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.number });
   const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.commit?.message }));
 
