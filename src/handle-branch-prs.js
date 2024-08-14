@@ -182,7 +182,7 @@ async function handlePRSync() {
 
   console.log(`Fetching commit messages for PR #${pullRequest?.number}`);
   const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.number });
-  const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.commit?.message }));
+  const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.message }));
 
   console.log('Parsing Commit messages');
   const pullRequestBody = parseCommitMessages(mappedCommitMessages);
