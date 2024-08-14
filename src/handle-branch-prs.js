@@ -301,7 +301,7 @@ async function handlePRSync() {
           option, 
         });
 
-        console.log(`Successfully changed ${statusField} to ${status} on ${project?.title} for issue #${issue?.number}`);
+        console.log(`Successfully changed Status to ${from} on ${project?.title} for issue #${issue?.number}`);
       }
     }
   }
