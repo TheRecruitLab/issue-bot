@@ -125,16 +125,16 @@ async function getIssuesWithProjectInfo({graphqlWithAuth, owner, repo, issues, s
                   }
                 }
               },
-              projectItems(first: 100) {
-                nodes {
-                  id,
-                  project {
+            },
+            projectItems(first: 100) {
+              nodes {
+                id,
+                project {
+                  id
+                },
+                fieldValueByName(name: "${statusField}") {
+                  ...on ProjectV2ItemFieldSingleSelectValue {
                     id
-                  },
-                  fieldValueByName(name: "${statusField}") {
-                    ...on ProjectV2ItemFieldSingleSelectValue {
-                      id
-                    }
                   }
                 }
               }
