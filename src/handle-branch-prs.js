@@ -65,18 +65,20 @@ async function getChunkedData(callbackFn, params)
 function parseCommitMessages(messages = [])
 {
   const regexChecks = [/\/([0-9]{0,9})\//g, /\|([0-9]{0,9})\|/g];
-  console.log(messages);
+
   return messages.reduce((prev, curr) => {
-    const trimmedStr = curr.replace(/\s+/g, '');
-
-    for(const check of regexChecks) {
-      const matches = trimmedStr.match(check);
-
-      for(const match of matches) {
-        const issueNumberMatch = match.match(/[0-9]{1,9}/g);
-
-        if (issueNumberMatch?.length) {
-          prev += `* #${issueNumberMatch[0]}\n`;
+    if (curr?.length) {
+      const trimmedStr = curr.replace(/\s+/g, '');
+  
+      for(const check of regexChecks) {
+        const matches = trimmedStr.match(check);
+  
+        for(const match of matches) {
+          const issueNumberMatch = match.match(/[0-9]{1,9}/g);
+  
+          if (issueNumberMatch?.length) {
+            prev += `* #${issueNumberMatch[0]}\n`;
+          }
         }
       }
     }
@@ -181,7 +183,10 @@ async function handlePRSync() {
   console.log(`Fetching commit messages for PR #${pullRequest?.number}`);
   const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseParams, pull_number: pullRequest?.number });
   const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.message }));
-
+  console.log({
+    commitMessages,
+    mappedCommitMessages,
+  });
   console.log('Parsing Commit messages');
   const pullRequestBody = parseCommitMessages(mappedCommitMessages);
 
