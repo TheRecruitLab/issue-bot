@@ -283,7 +283,7 @@ async function handlePRSync() {
   const issues = await getIssuesWithProjectInfo({ 
     ...baseGraphqlParams, 
     issues: issueNumbers, 
-    status: to, 
+    status: from, 
     statusField: 'Status',
   });
 
