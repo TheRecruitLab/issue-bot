@@ -60,8 +60,6 @@ async function getChunkedData(callbackFn, params)
 
     const linkHeader = response.headers?.link;
 
-    console.log(response);
-
     pagesRemaining = linkHeader && linkHeader.includes(`rel=\"next\"`);
 
     if (pagesRemaining) {
@@ -78,26 +76,27 @@ function parseCommitMessages(messages = [])
   const regexChecks = [/\/([0-9]{0,9})\//g, /\|([0-9]{0,9})\|/g];
   const issues = [];
 
-  const message = messages.reduce((prev, curr) => {
-    const trimmedStr = curr.replace(/\s+/g, '');
-
+  for(const message of messages) {
+    const trimmedStr = message.replace(/\s+/g, '');
+  
     for(const check of regexChecks) {
-      const matches = trimmedStr.match(check);
+      const matches = trimmedStr.match(check) ?? [];
 
       for(const match of matches) {
-        const issueNumberMatch = match.match(/[0-9]{1,9}/g);
+        const issueNumberMatch = match.match(/[0-9]{1,9}/g) ?? [];
+        const [issueNumber] = issueNumberMatch;
 
-        if (issueNumberMatch?.length) {
-          issueNumbers.push(issueNumberMatch[0]);
-          prev += `* #${issueNumberMatch[0]}\n`;
+        if (issueNumber?.length && !issues.includes(issueNumber)) {
+          issues.push(issueNumber);
         }
       }
     }
+  }
 
-    return prev;
-  }, '');
-
-  return { message, issues };
+  return { 
+    message: issueNumbers.reduce((prev, curr) => `${prev}* #${curr}\n`, ''), 
+    issues,
+  };
 }
 
 async function getIssuesWithProjectInfo({graphqlWithAuth, owner, repo, issues, status, statusField })
@@ -178,7 +177,7 @@ async function getListOfPullRequests({ octokit, owner, repo, base, state = 'open
   return octokit.request('GET /repos/{owner}/{repo}/pulls', {
     owner,
     repo,
-    base: 'production',
+    base,
     state,
     per_page: 100,
     sort: 'created',
@@ -266,9 +265,9 @@ async function handlePRSync() {
     return;
   }
 
-  console.log('Fetching commit messages');
-  const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseRestParams, pull_number: pullRequest?.issue_number });
-  const mappedCommitMessages = commitMessages.map((commit) => ({ message: commit?.commit?.message }));
+  console.log(`Fetching commit messages for PR #${pullRequest?.number}`);
+  const commitMessages = await getChunkedData(getPullRequestCommits, { ...baseRestParams, pull_number: pullRequest?.number });
+  const mappedCommitMessages = commitMessages.map((commit) => commit?.commit?.message);
 
   console.log('Parsing Commit messages');
   const { issues: issueNumbers, message: pullRequestBody } = parseCommitMessages(mappedCommitMessages);
@@ -276,8 +275,8 @@ async function handlePRSync() {
   console.log('Syncing commit messages to pull request body');
   await updatePullRequest({ 
     ...baseRestParams, 
-    pull_number: pullRequest?.issue_number, 
-    body: pullRequestBody, 
+    pull_number: pullRequest?.number, 
+    body: pullRequestBody,
   });
 
   console.log('Retrieving issue information');
