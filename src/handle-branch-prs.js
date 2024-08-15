@@ -247,7 +247,7 @@ async function handlePRSync() {
 
   console.log(`PR Exists: ${Boolean(pullRequest)}`);
 
-  if (! pullRequest) {
+  if (! pullRequest && to !== from) {
     const comparison = await compareBranches({ ...baseRestParams, base: to, head: from });
     const branchesNotInSync = comparison?.ahead_by !== 0 || comparison?.behind_by !== 0;
 
@@ -259,8 +259,10 @@ async function handlePRSync() {
 
       pullRequest = await createPullRequest({ ...baseRestParams, base: to, head: from });
     }
+  } else if (! pullRequest && to === from) {
+    pullRequest = payload?.pull_request;
   }
-
+  
   if (! pullRequest) {
     return;
   }
@@ -272,12 +274,15 @@ async function handlePRSync() {
   console.log('Parsing Commit messages');
   const { issues: issueNumbers, message: pullRequestBody } = parseCommitMessages(mappedCommitMessages);
 
-  console.log('Syncing commit messages to pull request body');
-  await updatePullRequest({ 
-    ...baseRestParams, 
-    pull_number: pullRequest?.number, 
-    body: pullRequestBody,
-  });
+  // Do not update PR if to and from are the same
+  if (to !== from ) {
+    console.log('Syncing commit messages to pull request body');
+    await updatePullRequest({ 
+      ...baseRestParams, 
+      pull_number: pullRequest?.number, 
+      body: pullRequestBody,
+    });
+  }
 
   console.log('Retrieving issue information');
   const issues = await getIssuesWithProjectInfo({ 
