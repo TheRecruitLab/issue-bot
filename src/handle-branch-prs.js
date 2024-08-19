@@ -323,6 +323,7 @@ async function handlePRSync() {
     if (from === 'dev') {
       await updateIssue({
         ...baseRestParams,
+        issue_number: issue?.number,
         state: 'closed',
       });
 
