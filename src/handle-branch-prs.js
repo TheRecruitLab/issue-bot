@@ -320,7 +320,7 @@ async function handlePRSync() {
       }
     }
 
-    if (from === 'dev') {
+    if (from === 'production') {
       await updateIssue({
         ...baseRestParams,
         issue_number: issue?.number,
