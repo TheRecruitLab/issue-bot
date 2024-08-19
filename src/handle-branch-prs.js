@@ -320,7 +320,7 @@ async function handlePRSync() {
       }
     }
 
-    if (from === 'production') {
+    if (from === 'dev') {
       await updateIssue({
         ...baseRestParams,
         state: 'closed',
