@@ -260,7 +260,7 @@ async function addPullRequestToProject({ graphqlWithAuth, projectId, pullRequest
       addProjectV2ItemById(
         input: {
           projectId: "${projectId}"
-          contentId: "${pullRequest?.id}"
+          contentId: "${pullRequest?.node_id}"
         }
       ) {
         item {
