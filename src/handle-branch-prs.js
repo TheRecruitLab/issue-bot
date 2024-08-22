@@ -394,6 +394,7 @@ async function handlePRSync() {
   }
   
   for(const { project, option } of projects) {
+    console.log({ ...pullRequest });
     const item = await addPullRequestToProject({ 
       ...baseGraphqlParams, 
       projectId: project?.id, 
