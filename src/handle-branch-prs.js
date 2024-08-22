@@ -260,7 +260,7 @@ async function addItemToProject({ graphqlWithAuth, projectId, itemId, statusFiel
       addProjectV2ItemById(
         input: {
           projectId: "${projectId}"
-          itemId: "${itemId}"
+          contentId: "${itemId}"
         }
       ) {
         item {
@@ -381,6 +381,9 @@ async function handlePRSync() {
   
   for(const { project, option } of projects) {
     const item = await addItemToProject({ ...baseGraphqlParams, projectId: project?.id, itemId: pullRequest?.id, statusField: 'Status' });
+
+    console.log(`Attached PR to project ${project?.title}`);
+
     const issue = await getIssueWithProjectInfo({
       ...baseGraphqlParams, 
       issue: item, 
@@ -396,6 +399,8 @@ async function handlePRSync() {
       projectItem, 
       option, 
     });
+
+    console.log(`Successfully changed Status to ${from} on ${project?.title} for pr #${issue?.number}`);
   }
 }
 
