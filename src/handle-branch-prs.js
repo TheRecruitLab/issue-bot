@@ -404,14 +404,7 @@ async function handlePRSync() {
 
     console.log(`Attached PR to project ${project?.title}`);
 
-    const issue = await getIssueWithProjectInfo({
-      ...baseGraphqlParams, 
-      issue: item?.number, 
-      status: from, 
-      statusField: 'Status',
-    });
-
-    const projectItem = issue.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
+    const projectItem = item.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
 
     await updateProjectItemValue({ 
       graphqlWithAuth, 
