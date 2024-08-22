@@ -406,7 +406,7 @@ async function handlePRSync() {
 
     const issue = await getIssueWithProjectInfo({
       ...baseGraphqlParams, 
-      issue: item, 
+      issue: item?.number, 
       status: from, 
       statusField: 'Status',
     });
