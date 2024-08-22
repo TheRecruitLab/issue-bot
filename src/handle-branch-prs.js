@@ -253,22 +253,35 @@ async function getPullRequestCommits({ octokit, owner, repo, pull_number, page =
   });
 }
 
-async function addItemToProject({ graphqlWithAuth, projectId, itemId, statusField }) 
+async function addPullRequestToProject({ graphqlWithAuth, projectId, pullRequest, statusField }) 
 {
-  return graphqlWithAuth(`
+  await graphqlWithAuth(`
     mutation {
       addProjectV2ItemById(
         input: {
           projectId: "${projectId}"
-          contentId: "${itemId}"
+          contentId: "${pullRequest?.id}"
         }
       ) {
         item {
+          id
+        }
+      }
+    }
+  `);
+
+  const { repository } = await graphqlWithAuth(`
+    {
+      repository(owner: "${owner}", name: "${repo}") {
+        pullRequest(number: ${pullRequest?.number}) { 
           id,
           number,
           projectItems(first: 100) {
             nodes {
               id,
+              project {
+                id
+              },
               fieldValueByName(name: "${statusField}") {
                 ...on ProjectV2ItemFieldSingleSelectValue {
                   id
@@ -276,10 +289,11 @@ async function addItemToProject({ graphqlWithAuth, projectId, itemId, statusFiel
               }
             }
           }
-        }
+        },
       }
-    }
-  `);
+    }`);
+
+  return repository?.pullRequest;
 }
  
 async function handlePRSync() {
@@ -380,7 +394,12 @@ async function handlePRSync() {
   }
   
   for(const { project, option } of projects) {
-    const item = await addItemToProject({ ...baseGraphqlParams, projectId: project?.id, itemId: pullRequest?.id, statusField: 'Status' });
+    const item = await addPullRequestToProject({ 
+      ...baseGraphqlParams, 
+      projectId: project?.id, 
+      pullRequest, 
+      statusField: 'Status',
+    });
 
     console.log(`Attached PR to project ${project?.title}`);
 
