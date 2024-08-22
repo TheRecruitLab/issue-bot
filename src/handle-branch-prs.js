@@ -99,51 +99,65 @@ function parseCommitMessages(messages = [])
   };
 }
 
+async function getIssueWithProjectInfo({graphqlWithAuth, owner, repo, issue, status, statusField })
+{
+  const { repository } = await graphqlWithAuth(`
+    {
+      repository(owner: "${owner}", name: "${repo}") {
+        issue(number: ${issue}) { 
+          id,
+          number,
+          projectsV2(first: 100) {
+            nodes {
+              id,
+              title,
+              field(name: "Status") {
+                ...on ProjectV2SingleSelectField {
+                  id,
+                  name,
+                  options (names: ["${status}"]) {
+                    id,
+                    name
+                  }
+                }
+              }
+            },
+          },
+          projectItems(first: 100) {
+            nodes {
+              id,
+              project {
+                id
+              },
+              fieldValueByName(name: "${statusField}") {
+                ...on ProjectV2ItemFieldSingleSelectValue {
+                  id
+                }
+              }
+            }
+          }
+        },
+      }
+    }`);
+
+  return repository?.issue;
+};
+
 async function getIssuesWithProjectInfo({graphqlWithAuth, owner, repo, issues, status, statusField })
 {
   const issuesWithProjectInfo = [];
 
   for(const issue of issues) {
-    const { repository } = await graphqlWithAuth(`
-      {
-        repository(owner: "${owner}", name: "${repo}") {
-          issue(number: ${issue}) { 
-            id,
-            number,
-            projectsV2(first: 100) {
-              nodes {
-                id,
-                title,
-                field(name: "Status") {
-                  ...on ProjectV2SingleSelectField {
-                    id,
-                    name,
-                    options (names: ["${status}"]) {
-                      id,
-                      name
-                    }
-                  }
-                }
-              },
-            },
-            projectItems(first: 100) {
-              nodes {
-                id,
-                project {
-                  id
-                },
-                fieldValueByName(name: "${statusField}") {
-                  ...on ProjectV2ItemFieldSingleSelectValue {
-                    id
-                  }
-                }
-              }
-            }
-          },
-        }
-      }`);
+    const data = await getIssueWithProjectInfo({
+      graphqlWithAuth,
+      owner,
+      repo,
+      issue,
+      status,
+      statusField,
+    });
 
-    issuesWithProjectInfo.push(repository.issue);
+    issuesWithProjectInfo.push(data);
 
     sleep(500); // There could be a lot of issues to link, so let's throttle this to 2 per second
   }
@@ -238,6 +252,35 @@ async function getPullRequestCommits({ octokit, owner, repo, pull_number, page =
     page,
   });
 }
+
+async function addItemToProject({ graphqlWithAuth, projectId, itemId, statusField }) 
+{
+  return graphqlWithAuth(`
+    mutation {
+      addProjectV2ItemById(
+        input: {
+          projectId: "${projectId}"
+          itemId: "${itemId}"
+        }
+      ) {
+        item {
+          id,
+          number,
+          projectItems(first: 100) {
+            nodes {
+              id,
+              fieldValueByName(name: "${statusField}") {
+                ...on ProjectV2ItemFieldSingleSelectValue {
+                  id
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
+}
  
 async function handlePRSync() {
   const { githubToken, from, to } = getInputVars();
@@ -302,13 +345,18 @@ async function handlePRSync() {
     statusField: 'Status',
   });
 
+  const projects = [];
+
   for (const issue of issues) {
     for (const project of (issue?.projectsV2?.nodes || [])) {
-
       const projectItem = issue.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
       const [option] = (project?.field?.options || []);
-
+      
       if (option && projectItem) {
+        if (! projects.some((value) => value?.project?.id === project?.id)) {
+          projects.push({ project, option });
+        }
+        
         await updateProjectItemValue({ 
           graphqlWithAuth, 
           project, 
@@ -329,6 +377,25 @@ async function handlePRSync() {
 
       console.log(`Successfully changed closed issue #${issue?.number}`);
     }
+  }
+  
+  for(const { project, option } of projects) {
+    const item = await addItemToProject({ ...baseGraphqlParams, projectId: project?.id, itemId: pullRequest?.id, statusField: 'Status' });
+    const issue = await getIssueWithProjectInfo({
+      ...baseGraphqlParams, 
+      issue: item, 
+      status: from, 
+      statusField: 'Status',
+    });
+
+    const projectItem = issue.projectItems?.nodes?.find((projectItem) => projectItem?.project?.id === project?.id);
+
+    await updateProjectItemValue({ 
+      graphqlWithAuth, 
+      project,
+      projectItem, 
+      option, 
+    });
   }
 }
 
