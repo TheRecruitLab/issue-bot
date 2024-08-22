@@ -253,7 +253,7 @@ async function getPullRequestCommits({ octokit, owner, repo, pull_number, page =
   });
 }
 
-async function addPullRequestToProject({ graphqlWithAuth, projectId, pullRequest, statusField }) 
+async function addPullRequestToProject({ graphqlWithAuth, owner, repo, projectId, pullRequest, statusField }) 
 {
   await graphqlWithAuth(`
     mutation {
