@@ -1,0 +1,17 @@
+name: 'Create PR if two branches are out of sync'
+description: 'Modify the state of a github issue'
+inputs:
+  github_token:
+    description: 'The github token'
+    required: true
+  from:
+    description: 'The branch to be merged'
+    required: true
+    default: 'dev'
+  to:
+    description: 'The base branch'
+    required: true
+    default: 'staging'
+runs:
+  using: 'node20'
+  main: '../lib/handle-branch-prs/index.js'
